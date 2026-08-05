@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class Random Group & Team Generator - LUCEROCASAS</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #cbd5e1;
+      --accent: #e0e7ff;
+      --success: #10b981;
+      --success-hover: #059669;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      /* Watermark background pattern */
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='160' viewBox='0 0 260 160'><text x='50%' y='50%' fill='rgba(15,23,42,0.035)' font-family='Segoe UI, sans-serif' font-weight='900' font-size='20' text-anchor='middle' dominant-baseline='middle' transform='rotate(-25 130 80)'>LUCEROCASAS</text></svg>");
+      background-repeat: repeat;
+      color: var(--text-main);
+      padding: 2rem 1rem;
+      line-height: 1.5;
+      position: relative;
+    }
+
+    /* Corner Watermark Badge */
+    .corner-watermark {
+      position: fixed;
+      bottom: 20px;
+      right: 25px;
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: rgba(15, 23, 42, 0.18);
+      text-transform: uppercase;
+      pointer-events: none;
+      user-select: none;
+      z-index: 9999;
+      border-bottom: 2px solid rgba(15, 23, 42, 0.1);
+      padding-bottom: 4px;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      color: var(--text-main);
+    }
+
+    .badge {
+      background-color: var(--accent);
+      color: var(--primary);
+      font-size: 0.85rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    /* Options Grid */
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-box {
+      border: 2px dashed var(--border-color);
+      background-color: var(--bg-color);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: border-color 0.2s;
+    }
+
+    .input-box:hover {
+      border-color: var(--primary);
+    }
+
+    .input-box p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .paste-container {
+      margin-bottom: 1rem;
+    }
+
+    .paste-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    textarea {
+      width: 100%;
+      height: 140px;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      resize: vertical;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .paste-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      align-items: center;
+    }
+
+    .btn-load {
+      background-color: var(--success);
+      color: white;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background-color 0.2s;
+    }
+
+    .btn-load:hover {
+      background-color: var(--success-hover);
+    }
+
+    .quick-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+
+    .btn-link {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* Calculator & Mode Controls */
+    .calc-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      background: var(--bg-color);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border: 1px solid var(--border-color);
+    }
+
+    @media (max-width: 640px) {
+      .calc-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .mode-selector {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .mode-option {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      background: white;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .input-group label {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--text-main);
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 1rem;
+      background: white;
+    }
+
+    /* Table for Combinations */
+    .combinations-box {
+      margin-top: 1rem;
+    }
+
+    .combinations-box h4 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .table-container {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .combos-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+
+    .combos-table th, .combos-table td {
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .combos-table th {
+      background-color: var(--accent);
+      color: var(--primary);
+      position: sticky;
+      top: 0;
+      font-weight: 700;
+    }
+
+    .combos-table tr:hover {
+      background-color: #f1f5f9;
+      cursor: pointer;
+    }
+
+    .badge-exact {
+      color: var(--success);
+      font-weight: bold;
+    }
+
+    .badge-remainder {
+      color: #d97706;
+      font-weight: bold;
+    }
+
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: #ef4444;
+      color: white;
+      flex: 0.3;
+    }
+
+    /* Results Output Section */
+    .groups-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .group-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-top: 4px solid var(--primary);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .group-card h3 {
+      font-size: 1rem;
+      color: var(--primary);
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .group-card ul {
+      list-style: none;
+    }
+
+    .group-card li {
+      padding: 0.3rem 0;
+      font-size: 0.9rem;
+      border-bottom: 1px dashed var(--bg-color);
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      border: 1px solid var(--border-color);
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 500;
+    }
+
+    .btn-sm:hover {
+      background-color: var(--bg-color);
+    }
+
+    .status-msg {
+      font-size: 0.85rem;
+      color: var(--success);
+      font-weight: 600;
+      display: none;
+    }
+
+    /* Plain Text Output Box at the Bottom */
+    .plain-text-section {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 2px dashed var(--border-color);
+    }
+
+    .plain-text-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .plain-text-header h3 {
+      font-size: 1rem;
+      color: var(--text-main);
+    }
+
+    .plain-text-box {
+      width: 100%;
+      height: 120px;
+      font-family: monospace;
+      font-size: 0.88rem;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.75rem;
+      color: var(--text-main);
+      white-space: pre;
+    }
+
+    /* Clean Print View */
+    @media print {
+      header, .card:not(#resultsCard), .toolbar, .corner-watermark, #resultsCard h2, .plain-text-section {
+        display: none !important;
+      }
+
+      body {
+        background: #ffffff !important;
+        padding: 0 !important;
+      }
+
+      .container {
+        max-width: 100% !important;
+      }
+
+      #resultsCard {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+
+      .group-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        border: 1px solid #cbd5e1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="corner-watermark">LUCEROCASAS</div>
+
+<div class="container">
+  <header>
+    <h1>Class Group & Team Generator</h1>
+    <p>Calculate possible team combinations and generate random groups instantly.</p>
+  </header>
+
+  <!-- Step 1: Class Roster & Paste Section -->
+  <div class="card">
+    <div class="card-header">
+      <h2>1. Class Roster / Student List</h2>
+      <span class="badge" id="studentCount">0 Students</span>
+    </div>
+
+    <!-- Quick Import Options -->
+    <div class="options-grid">
+      <!-- File Upload Box -->
+      <div class="input-box">
+        <p>📁 <strong>Upload file</strong> (.txt or .csv)</p>
+        <input type="file" id="fileInput" accept=".txt,.csv,.tsv" style="display: none;">
+        <button type="button" class="btn-sm" id="uploadBtn">Select File</button>
+        <span id="fileName" style="font-size: 0.8rem; color: var(--text-muted);">No file selected</span>
+      </div>
+
+      <!-- Quick Paste Box -->
+      <div class="input-box">
+        <p>📋 <strong>Quick Paste</strong></p>
+        <button type="button" class="btn-sm" id="pasteClipboardBtn">📋 Paste from Clipboard</button>
+        <p style="font-size: 0.75rem;">Copy from Excel or Word and click here</p>
+      </div>
+    </div>
+
+    <!-- Direct Paste Area -->
+    <div class="paste-container">
+      <div class="paste-label">
+        <span>Type or Paste your list directly:</span>
+        <span class="status-msg" id="statusMsg">✓ List loaded successfully</span>
+      </div>
+      <textarea id="roster" placeholder="Paste names here (one name per line)...&#10;Example:&#10;John Doe&#10;Jane Smith&#10;Alex Johnson"></textarea>
+      
+      <div class="paste-actions">
+        <button type="button" class="btn-load" id="loadListBtn">⚡ Load / Update List</button>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Click to sync student count.</span>
+      </div>
+    </div>
+    
+    <div class="quick-actions">
+      <button type="button" class="btn-link" id="loadSampleBtn">+ Load 24 sample students</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Settings & Combinations Calculator -->
+  <div class="card">
+    <h2>2. Group Strategy & Calculator</h2>
+
+    <!-- Total Students Quick Manual Counter & Target -->
+    <div class="calc-row">
+      <div class="input-group">
+        <label for="totalStudentsInput">🧮 Total Number of Students:</label>
+        <input type="number" id="totalStudentsInput" min="1" value="0" placeholder="Enter total students...">
+        <span style="font-size: 0.75rem; color: var(--text-muted);">Auto-filled from list, or type a custom number to test combinations.</span>
+      </div>
+
+      <div class="input-group">
+        <label id="targetLabel" for="targetInput">🔢 Target Value:</label>
+        <input type="number" id="targetInput" min="1" value="4">
+        <span style="font-size: 0.75rem; color: var(--text-muted);" id="targetHelp">Total number of groups to form.</span>
+      </div>
+    </div>
+
+    <!-- Mode Selector -->
+    <div class="mode-selector">
+      <label class="mode-option">
+        <input type="radio" name="mode" value="groups" checked>
+        <span>Set Total Number of Groups</span>
+      </label>
+      <label class="mode-option">
+        <input type="radio" name="mode" value="size">
+        <span>Set Members per Group (Size)</span>
+      </label>
+    </div>
+
+    <!-- Possible Combinations Table -->
+    <div class="combinations-box">
+      <h4>Available Combinations Breakdown (Click to Select)</h4>
+      <div class="table-container">
+        <table class="combos-table">
+          <thead>
+            <tr>
+              <th>Number of Groups</th>
+              <th>Members per Group</th>
+              <th>Distribution / Remainder</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="combinationsBody">
+            <tr>
+              <td colspan="4" style="text-align: center; color: var(--text-muted);">Enter total students or load a list to calculate options.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn btn-primary" id="generateBtn">Generate Teams</button>
+      <button type="button" class="btn btn-secondary" id="clearBtn">Clear</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Results Output -->
+  <div id="resultsCard" class="card" style="display: none;">
+    <div class="toolbar">
+      <button type="button" class="btn-sm" id="copyBtn">📋 Copy Full Cards</button>
+      <button type="button" class="btn-sm" onclick="window.print()">🖨️ Print</button>
+    </div>
+    <h2>Generated Teams</h2>
+    <div class="groups-grid" id="groupsGrid"></div>
+
+    <!-- NEW: Plain Text Output Function at the Very Bottom -->
+    <div class="plain-text-section">
+      <div class="plain-text-header">
+        <h3>📄 Plain Text Format (Team 1: Student A, Student B...)</h3>
+        <button type="button" class="btn-sm" id="copyTextFormatBtn">📋 Copy Plain Text</button>
+      </div>
+      <textarea id="plainTextOutput" class="plain-text-box" readonly placeholder="Generated text will appear here..."></textarea>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const rosterInput = document.getElementById('roster');
+    const studentCountBadge = document.getElementById('studentCount');
+    const totalStudentsInput = document.getElementById('totalStudentsInput');
+    const targetInput = document.getElementById('targetInput');
+    const targetLabel = document.getElementById('targetLabel');
+    const targetHelp = document.getElementById('targetHelp');
+    const combinationsBody = document.getElementById('combinationsBody');
+    const resultsCard = document.getElementById('resultsCard');
+    const groupsGrid = document.getElementById('groupsGrid');
+    const plainTextOutput = document.getElementById('plainTextOutput');
+    const generateBtn = document.getElementById('generateBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const loadSampleBtn = document.getElementById('loadSampleBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const copyTextFormatBtn = document.getElementById('copyTextFormatBtn');
+    const modeRadios = document.querySelectorAll('input[name="mode"]');
+    const statusMsg = document.getElementById('statusMsg');
+    
+    // File & Paste Elements
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileName = document.getElementById('fileName');
+    const pasteClipboardBtn = document.getElementById('pasteClipboardBtn');
+    const loadListBtn = document.getElementById('loadListBtn');
+
+    // Handle File Upload
+    uploadBtn.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        fileName.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          rosterInput.value = event.target.result;
+          syncRosterToCount();
+          showStatus('✓ List loaded from file');
+        };
+        reader.readAsText(file);
+      }
+    });
+
+    // Handle Quick Clipboard Paste
+    pasteClipboardBtn.addEventListener('click', async () => {
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          const text = await navigator.clipboard.readText();
+          if (text.trim()) {
+            rosterInput.value = text;
+            syncRosterToCount();
+            showStatus('✓ Pasted and loaded from clipboard');
+          } else {
+            alert('Clipboard is empty.');
+          }
+        } else {
+          alert('Paste text directly into the box and click "Load / Update List".');
+          rosterInput.focus();
+        }
+      } catch (err) {
+        alert('Please paste directly into the text area.');
+        rosterInput.focus();
+      }
+    });
+
+    // Handle Load / Update Button
+    loadListBtn.addEventListener('click', () => {
+      syncRosterToCount();
+      const count = getStudents().length;
+      if (count > 0) {
+        showStatus(`✓ List processed (${count} students)`);
+      } else {
+        alert('Please type or paste at least one student name.');
+      }
+    });
+
+    function showStatus(msg) {
+      statusMsg.textContent = msg;
+      statusMsg.style.display = 'inline';
+      setTimeout(() => {
+        statusMsg.style.display = 'none';
+      }, 3000);
+    }
+
+    // Parse Roster Text
+    function getStudents() {
+      return rosterInput.value
+        .split(/[\r\n,;]+/)
+        .map(name => name.trim())
+        .filter(name => name.length > 0);
+    }
+
+    // Sync roster text -> Total Students Input
+    function syncRosterToCount() {
+      const students = getStudents();
+      const count = students.length;
+      studentCountBadge.textContent = `${count} Student${count === 1 ? '' : 's'}`;
+      totalStudentsInput.value = count;
+      calculateCombinations(count);
+    }
+
+    // Calculate Combinations Table
+    function calculateCombinations(totalStudents) {
+      combinationsBody.innerHTML = '';
+
+      if (!totalStudents || totalStudents < 2) {
+        combinationsBody.innerHTML = `
+          <tr>
+            <td colspan="4" style="text-align: center; color: var(--text-muted);">
+              Enter 2 or more students to view combinations.
+            </td>
+          </tr>`;
+        return;
+      }
+
+      const activeMode = document.querySelector('input[name="mode"]:checked').value;
+
+      for (let g = 2; g <= Math.min(totalStudents, 15); g++) {
+        const membersPerGroup = Math.floor(totalStudents / g);
+        const remainder = totalStudents % g;
+
+        if (membersPerGroup < 1) continue;
+
+        const tr = document.createElement('tr');
+
+        let statusText = '';
+        if (remainder === 0) {
+          statusText = `<span class="badge-exact">✓ Exact (${membersPerGroup} per group)</span>`;
+        } else {
+          statusText = `<span class="badge-remainder">⚠ ${g - remainder} groups of ${membersPerGroup}, ${remainder} groups of ${membersPerGroup + 1}</span>`;
+        }
+
+        tr.innerHTML = `
+          <td><strong>${g} Groups</strong></td>
+          <td>~${membersPerGroup} members/group</td>
+          <td>${statusText}</td>
+          <td><button class="btn-sm" type="button" style="padding:0.2rem 0.5rem; font-size:0.75rem;">Use Option</button></td>
+        `;
+
+        tr.addEventListener('click', () => {
+          if (activeMode === 'groups') {
+            targetInput.value = g;
+          } else {
+            targetInput.value = membersPerGroup;
+          }
+        });
+
+        combinationsBody.appendChild(tr);
+      }
+    }
+
+    // Total Students Manual Input listener
+    totalStudentsInput.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10) || 0;
+      studentCountBadge.textContent = `${val} Student${val === 1 ? '' : 's'}`;
+      calculateCombinations(val);
+    });
+
+    // Mode Toggle
+    modeRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        if (e.target.value === 'groups') {
+          targetLabel.textContent = '🔢 Total Number of Groups:';
+          targetHelp.textContent = 'Specify how many groups you want to create.';
+          targetInput.value = 4;
+        } else {
+          targetLabel.textContent = '👤 Group Size (Members):';
+          targetHelp.textContent = 'Specify how many members per group.';
+          targetInput.value = 3;
+        }
+        const total = parseInt(totalStudentsInput.value, 10) || getStudents().length;
+        calculateCombinations(total);
+      });
+    });
+
+    // Fisher-Yates Array Shuffle
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // Generate Teams Algorithm
+    function generateGroups() {
+      let students = getStudents();
+      const manualTotal = parseInt(totalStudentsInput.value, 10) || 0;
+
+      if (students.length === 0 && manualTotal > 0) {
+        students = Array.from({ length: manualTotal }, (_, i) => `Student ${i + 1}`);
+      }
+
+      if (students.length === 0) {
+        alert('Please enter total students or paste a roster list first.');
+        return;
+      }
+
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+      const targetVal = parseInt(targetInput.value, 10);
+
+      if (isNaN(targetVal) || targetVal < 1) {
+        alert('Please enter a valid target number.');
+        return;
+      }
+
+      const shuffled = shuffle(students);
+      let groups = [];
+
+      if (mode === 'groups') {
+        const numGroups = Math.min(targetVal, shuffled.length);
+        groups = Array.from({ length: numGroups }, () => []);
+        
+        shuffled.forEach((student, index) => {
+          groups[index % numGroups].push(student);
+        });
+      } else {
+        const groupSize = targetVal;
+        for (let i = 0; i < shuffled.length; i += groupSize) {
+          groups.push(shuffled.slice(i, i + groupSize));
+        }
+      }
+
+      renderResults(groups);
+    }
+
+    // Render Output Cards & Plain Text Format
+    function renderResults(groups) {
+      groupsGrid.innerHTML = '';
+      let plainTextLines = [];
+
+      groups.forEach((group, idx) => {
+        // Visual Card Rendering
+        const card = document.createElement('div');
+        card.className = 'group-card';
+
+        const title = document.createElement('h3');
+        title.innerHTML = `Team ${idx + 1} <span style="font-weight:normal; font-size:0.8rem; color:#64748b;">(${group.length} members)</span>`;
+
+        const list = document.createElement('ul');
+        group.forEach(member => {
+          const li = document.createElement('li');
+          li.textContent = member;
+          list.appendChild(li);
+        });
+
+        card.appendChild(title);
+        card.appendChild(list);
+        groupsGrid.appendChild(card);
+
+        // Plain Text Format: Team 1: Student A, Student B, Student C
+        plainTextLines.push(`Team ${idx + 1}: ${group.join(', ')}`);
+      });
+
+      // Populate Plain Text Box at the bottom
+      plainTextOutput.value = plainTextLines.join('\n');
+
+      resultsCard.style.display = 'block';
+      resultsCard.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Event Handlers
+    rosterInput.addEventListener('input', syncRosterToCount);
+    generateBtn.addEventListener('click', generateGroups);
+
+    clearBtn.addEventListener('click', () => {
+      rosterInput.value = '';
+      fileInput.value = '';
+      fileName.textContent = 'No file selected';
+      totalStudentsInput.value = 0;
+      targetInput.value = 4;
+      plainTextOutput.value = '';
+      resultsCard.style.display = 'none';
+      syncRosterToCount();
+    });
+
+    loadSampleBtn.addEventListener('click', () => {
+      const sampleNames = [
+        "Emma Watson", "Liam Smith", "Olivia Johnson", "Noah Williams", "Ava Brown",
+        "Ethan Jones", "Sophia Garcia", "Mason Miller", "Isabella Davis", "William Rodriguez",
+        "Mia Martinez", "James Hernandez", "Harper Lopez", "Alexander Gonzalez", "Evelyn Wilson",
+        "Benjamin Anderson", "Charlotte Thomas", "Lucas Taylor", "Amelia Moore", "Henry Jackson",
+        "Daniel White", "Ella Harris", "Matthew Martin", "Chloe Clark"
+      ];
+      rosterInput.value = sampleNames.join('\n');
+      syncRosterToCount();
+      showStatus('✓ 24 sample students loaded');
+    });
+
+    // Copy Cards
+    copyBtn.addEventListener('click', () => {
+      const cards = document.querySelectorAll('.group-card');
+      let text = '';
+      cards.forEach(card => {
+        const title = card.querySelector('h3').innerText;
+        const members = Array.from(card.querySelectorAll('li')).map(li => `- ${li.innerText}`).join('\n');
+        text += `${title}\n${members}\n\n`;
+      });
+
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Cards copied to clipboard!');
+      });
+    });
+
+    // Copy Plain Text Format (Team 1: x, x, x)
+    copyTextFormatBtn.addEventListener('click', () => {
+      if (!plainTextOutput.value) return;
+      navigator.clipboard.writeText(plainTextOutput.value).then(() => {
+        alert('Plain text list copied to clipboard!');
+      });
+    });
+  });
+</script>
+</body>
+</html>
